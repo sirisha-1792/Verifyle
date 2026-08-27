@@ -33,10 +33,17 @@ public class OtpService {
 
     private final SecureRandom secureRandom = new SecureRandom();
 
+    @Value("${app.otp.dev-mode:true}")
+    private boolean devMode;
+
+    public boolean isDevMode() {
+        return devMode;
+    }
+
     /**
      * Generates a new 6-digit OTP, saves it, and sends it via email.
      */
-    public void generateAndSendOtp(User user) {
+    public String generateAndSendOtp(User user) {
         String otpCode = String.format("%06d", secureRandom.nextInt(1000000));
 
         OtpToken otpToken = OtpToken.builder()
@@ -49,6 +56,7 @@ public class OtpService {
 
         otpTokenRepository.save(otpToken);
         emailService.sendOtpEmail(user.getEmail(), otpCode);
+        return otpCode;
     }
 
     /**

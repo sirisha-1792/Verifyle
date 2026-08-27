@@ -48,6 +48,12 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success("Users retrieved", result));
     }
 
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Long id, Authentication authentication) {
+        adminService.deleteUser(id, authentication.getName());
+        return ResponseEntity.ok(ApiResponse.success("User deleted successfully"));
+    }
+
     // ===== Document Types =====
 
     @GetMapping("/document-types")

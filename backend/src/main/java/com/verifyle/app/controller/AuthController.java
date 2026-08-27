@@ -18,11 +18,19 @@ public class AuthController {
 
     private final AuthService authService;
 
+    private final com.verifyle.app.service.OtpService otpService;
+
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody RegisterRequest request) {
-        authService.register(request);
+    public ResponseEntity<ApiResponse<java.util.Map<String, Object>>> register(@Valid @RequestBody RegisterRequest request) {
+        String otp = authService.register(request);
+        java.util.Map<String, Object> data = new java.util.HashMap<>();
+        data.put("email", request.getEmail());
+        if (otpService.isDevMode()) {
+            data.put("devOtp", otp);
+            data.put("devMode", true);
+        }
         return ResponseEntity.ok(ApiResponse.success(
-                "Registration successful. Please check your email for the OTP verification code."));
+                "Registration successful. Please check your email for the OTP verification code.", data));
     }
 
     @PostMapping("/verify-otp")
@@ -32,13 +40,19 @@ public class AuthController {
     }
 
     @PostMapping("/resend-otp")
-    public ResponseEntity<ApiResponse<Void>> resendOtp(@RequestBody java.util.Map<String, String> request) {
+    public ResponseEntity<ApiResponse<java.util.Map<String, Object>>> resendOtp(@RequestBody java.util.Map<String, String> request) {
         String email = request.get("email");
         if (email == null || email.isBlank()) {
             return ResponseEntity.badRequest().body(ApiResponse.error("Email is required"));
         }
-        authService.resendOtp(email);
-        return ResponseEntity.ok(ApiResponse.success("OTP resent successfully. Please check your email."));
+        String otp = authService.resendOtp(email);
+        java.util.Map<String, Object> data = new java.util.HashMap<>();
+        data.put("email", email);
+        if (otpService.isDevMode()) {
+            data.put("devOtp", otp);
+            data.put("devMode", true);
+        }
+        return ResponseEntity.ok(ApiResponse.success("OTP resent successfully. Please check your email.", data));
     }
 
     @PostMapping("/login")

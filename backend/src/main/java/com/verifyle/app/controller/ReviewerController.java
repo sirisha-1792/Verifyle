@@ -33,6 +33,26 @@ public class ReviewerController {
         return ResponseEntity.ok(ApiResponse.success("Review queue retrieved", result));
     }
 
+    @GetMapping("/history")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getReviewHistory(Authentication authentication) {
+        List<ReviewDecision> history = reviewService.getReviewerHistory(authentication.getName());
+        List<Map<String, Object>> result = history.stream().map(d -> {
+            Map<String, Object> dm = new LinkedHashMap<>();
+            dm.put("id", d.getId());
+            dm.put("documentId", d.getDocumentRequest().getId());
+            dm.put("documentTitle", d.getDocumentRequest().getTitle());
+            dm.put("documentType", d.getDocumentRequest().getDocumentType().getName());
+            dm.put("submitterName", d.getDocumentRequest().getSubmitter().getFullName());
+            dm.put("decision", d.getDecision().name());
+            dm.put("reason", d.getReason());
+            dm.put("stepName", d.getWorkflowStepInstance().getStepName());
+            dm.put("versionNumber", d.getDocumentVersion().getVersionNumber());
+            dm.put("createdAt", d.getCreatedAt().toString());
+            return dm;
+        }).toList();
+        return ResponseEntity.ok(ApiResponse.success("Review history retrieved", result));
+    }
+
     @GetMapping("/documents/{id}")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getDocumentForReview(
             @PathVariable Long id, Authentication authentication) {

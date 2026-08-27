@@ -13,4 +13,6 @@ public interface OtpTokenRepository extends JpaRepository<OtpToken, Long> {
     Optional<OtpToken> findTopByUserOrderByCreatedAtDesc(User user);
 
     Optional<OtpToken> findTopByUserEmailOrderByCreatedAtDesc(String email);
+
+    void deleteByUser(User user);
 }

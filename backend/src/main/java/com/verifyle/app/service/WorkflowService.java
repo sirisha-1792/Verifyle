@@ -25,6 +25,7 @@ public class WorkflowService {
     private final WorkflowStepTemplateRepository stepTemplateRepository;
     private final WorkflowStepInstanceRepository stepInstanceRepository;
     private final DocumentTypeRepository documentTypeRepository;
+    private final DocumentRequestRepository documentRequestRepository;
     private final UserRepository userRepository;
 
     /**
@@ -128,17 +129,27 @@ public class WorkflowService {
     }
 
     /**
-     * Resets workflow to step 1 (used when submitter re-uploads after correction).
+     * Resets workflow to step 1 (used when submitter re-uploads after correction or rejection).
      */
     @Transactional
     public void resetWorkflow(DocumentRequest docRequest, DocumentVersion newVersion) {
-        // Delete old step instances
-        List<WorkflowStepInstance> oldSteps = stepInstanceRepository
+        List<WorkflowStepInstance> steps = stepInstanceRepository
                 .findByDocumentRequestOrderByStepOrderAsc(docRequest);
-        stepInstanceRepository.deleteAll(oldSteps);
 
-        // Re-instantiate from template
-        instantiateWorkflow(docRequest, newVersion);
+        for (WorkflowStepInstance step : steps) {
+            step.setDocumentVersion(newVersion);
+            step.setCompletedAt(null);
+            if (step.getStepOrder() == 1) {
+                step.setStatus(StepStatus.IN_PROGRESS);
+            } else {
+                step.setStatus(StepStatus.PENDING);
+            }
+            stepInstanceRepository.save(step);
+        }
+
+        docRequest.setCurrentStepOrder(1);
+        docRequest.setStatus(DocumentStatus.IN_REVIEW);
+        documentRequestRepository.save(docRequest);
     }
 
     /**

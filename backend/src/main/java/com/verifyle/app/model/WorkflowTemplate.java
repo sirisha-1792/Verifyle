@@ -26,7 +26,7 @@ public class WorkflowTemplate {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "document_type_id", nullable = false)
     private DocumentType documentType;
 

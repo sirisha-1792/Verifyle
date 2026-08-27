@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -7,6 +8,9 @@ import Sidebar from './components/Sidebar';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import OtpVerifyPage from './pages/auth/OtpVerifyPage';
+
+// Common / Profile pages
+import ProfilePage from './pages/profile/ProfilePage';
 
 // Submitter pages
 import SubmitterDashboard from './pages/submitter/SubmitterDashboard';
@@ -39,6 +43,11 @@ function AppLayout({ children }) {
 export default function App() {
   const { user, loading, isAuthenticated } = useAuth();
 
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('verifyle_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }, []);
+
   if (loading) {
     return (
       <div className="loading-spinner" style={{ minHeight: '100vh' }}>
@@ -63,10 +72,8 @@ export default function App() {
       <Route path="/login" element={
         isAuthenticated() ? <Navigate to={getDefaultRoute()} replace /> : <LoginPage />
       } />
-      <Route path="/register" element={
-        isAuthenticated() ? <Navigate to={getDefaultRoute()} replace /> : <RegisterPage />
-      } />
-      <Route path="/verify-otp" element={<OtpVerifyPage />} />
+      <Route path="/register" element={<Navigate to="/login" replace />} />
+      <Route path="/verify-otp" element={<Navigate to="/login" replace />} />
 
       {/* Submitter Routes */}
       <Route path="/submitter" element={
@@ -94,6 +101,13 @@ export default function App() {
       <Route path="/reviewer/documents/:id" element={
         <ProtectedRoute allowedRoles={['ROLE_VERIFIER']}>
           <AppLayout><ReviewDocumentPage /></AppLayout>
+        </ProtectedRoute>
+      } />
+
+      {/* Common Authenticated Routes */}
+      <Route path="/profile" element={
+        <ProtectedRoute allowedRoles={['ROLE_ADMIN', 'ROLE_VERIFIER', 'ROLE_SUBMITTER']}>
+          <AppLayout><ProfilePage /></AppLayout>
         </ProtectedRoute>
       } />
 

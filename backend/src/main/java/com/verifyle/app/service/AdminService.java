@@ -55,8 +55,33 @@ public class AdminService {
         return userRepository.save(user);
     }
 
+    private final com.verifyle.app.repository.OtpTokenRepository otpTokenRepository;
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    /**
+     * Deletes a user. Prevents deleting self or the only admin.
+     */
+    @Transactional
+    public void deleteUser(Long userId, String adminEmail) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new com.verifyle.app.exception.ResourceNotFoundException("User not found"));
+
+        if (user.getEmail().equalsIgnoreCase(adminEmail)) {
+            throw new BadRequestException("You cannot delete your own account");
+        }
+
+        if (user.getRole() == Role.ROLE_ADMIN && userRepository.countByRole(Role.ROLE_ADMIN) <= 1) {
+            throw new BadRequestException("Cannot delete the only admin user");
+        }
+
+        // Delete associated OTP tokens first
+        otpTokenRepository.deleteByUser(user);
+
+        // Delete user
+        userRepository.delete(user);
     }
 
     /**

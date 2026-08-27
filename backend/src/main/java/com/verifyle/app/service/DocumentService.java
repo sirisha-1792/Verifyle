@@ -116,8 +116,9 @@ public class DocumentService {
     public DocumentRequest resubmitDocument(Long documentId, MultipartFile file, String submitterEmail) {
         DocumentRequest docRequest = getDocumentById(documentId, submitterEmail);
 
-        if (docRequest.getStatus() != DocumentStatus.CORRECTION_REQUESTED) {
-            throw new BadRequestException("Document is not in CORRECTION_REQUESTED status");
+        if (docRequest.getStatus() != DocumentStatus.CORRECTION_REQUESTED
+                && docRequest.getStatus() != DocumentStatus.REJECTED) {
+            throw new BadRequestException("Document cannot be re-submitted in current status: " + docRequest.getStatus());
         }
 
         // Store new file

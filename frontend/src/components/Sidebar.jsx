@@ -65,16 +65,29 @@ export default function Sidebar() {
             </NavLink>
           </div>
         ))}
+        
+        {/* Settings & Theme link for everyone */}
+        <div className="nav-item" style={{ marginTop: '0.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '0.5rem' }}>
+          <NavLink
+            to="/profile"
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+          >
+            <span className="nav-icon">⚙️</span>
+            Settings & Theme
+          </NavLink>
+        </div>
       </nav>
 
       <div className="sidebar-footer">
         <div className="user-info">
-          <div className="user-avatar">{getInitials(user.fullName)}</div>
-          <div>
-            <div className="user-name">{user.fullName}</div>
-            <div className="user-role">{getRoleLabel(user.role)}</div>
-          </div>
-          <button className="logout-btn" onClick={handleLogout} title="Logout">
+          <NavLink to="/profile" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
+            <div className="user-avatar">{getInitials(user.fullName)}</div>
+            <div style={{ minWidth: 0, overflow: 'hidden' }}>
+              <div className="user-name text-truncate">{user.fullName}</div>
+              <div className="user-role">{getRoleLabel(user.role)}</div>
+            </div>
+          </NavLink>
+          <button className="logout-btn" onClick={handleLogout} title="Logout" id="sidebar-logout-btn">
             🚪
           </button>
         </div>

@@ -32,7 +32,7 @@ public class AuthService {
      * Registers a new submitter user. Sends OTP for email verification.
      */
     @Transactional
-    public void register(RegisterRequest request) {
+    public String register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("Email is already registered");
         }
@@ -47,7 +47,7 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
-        otpService.generateAndSendOtp(user);
+        return otpService.generateAndSendOtp(user);
     }
 
     /**
@@ -75,7 +75,7 @@ public class AuthService {
      * Resends OTP with 60-second cooldown enforcement.
      */
     @Transactional
-    public void resendOtp(String email) {
+    public String resendOtp(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
@@ -88,7 +88,7 @@ public class AuthService {
             throw new BadRequestException("Please wait " + remaining + " seconds before requesting a new OTP");
         }
 
-        otpService.generateAndSendOtp(user);
+        return otpService.generateAndSendOtp(user);
     }
 
     /**

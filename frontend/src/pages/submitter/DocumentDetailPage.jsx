@@ -73,6 +73,8 @@ export default function DocumentDetailPage() {
     return <div className="empty-state"><h5>Document not found</h5></div>;
   }
 
+  const latestVersion = doc.versions?.[0];
+
   return (
     <div className="fade-in">
       <div className="page-header">
@@ -109,16 +111,101 @@ export default function DocumentDetailPage() {
             </div>
           )}
 
-          {/* Re-submit section (if correction requested) */}
-          {doc.status === 'CORRECTION_REQUESTED' && (
-            <div className="data-card mb-4" style={{ border: '2px solid var(--warning)' }}>
-              <div className="data-card-header" style={{ background: 'var(--warning-light)' }}>
-                <h5>⚠️ Correction Required</h5>
+          {/* Certificate / Document In-Page Preview */}
+          {latestVersion && (
+            <div className="data-card mb-4">
+              <div className="data-card-header d-flex justify-content-between align-items-center">
+                <h5>Document Preview (Version {latestVersion.versionNumber})</h5>
+                <a
+                  href={`/api/documents/download/${latestVersion.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline-custom btn-sm"
+                >
+                  ⬇ Download / View Original
+                </a>
               </div>
               <div style={{ padding: '1.25rem' }}>
-                <p style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>
-                  A reviewer has requested corrections. Please re-upload the corrected document.
+                <div className="doc-preview mb-3">
+                  <div className="doc-icon">
+                    {latestVersion.contentType === 'application/pdf' ? '📄' : '🖼️'}
+                  </div>
+                  <div>
+                    <div className="doc-name">{latestVersion.originalFileName}</div>
+                    <div className="doc-meta">
+                      {formatFileSize(latestVersion.fileSize)} · Uploaded {formatDate(latestVersion.uploadedAt)}
+                    </div>
+                  </div>
+                </div>
+
+                {latestVersion.contentType?.startsWith('image/') && (
+                  <div className="text-center p-3" style={{ background: '#0F172A', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                    <img
+                      src={`/api/documents/download/${latestVersion.id}`}
+                      alt="Certificate preview"
+                      style={{ maxWidth: '100%', maxHeight: '520px', borderRadius: 'var(--radius-sm)', objectFit: 'contain', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                    />
+                  </div>
+                )}
+
+                {latestVersion.contentType === 'application/pdf' && (
+                  <div style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+                    <iframe
+                      src={`/api/documents/download/${latestVersion.id}`}
+                      width="100%"
+                      height="520px"
+                      title="PDF Preview"
+                      style={{ border: 'none' }}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Re-submit section (if correction requested or rejected) */}
+          {(doc.status === 'CORRECTION_REQUESTED' || doc.status === 'REJECTED') && (
+            <div
+              className="data-card mb-4"
+              style={{
+                border: doc.status === 'REJECTED' ? '2px solid var(--danger)' : '2px solid var(--warning)',
+                borderRadius: 'var(--radius-lg)'
+              }}
+            >
+              <div
+                className="data-card-header"
+                style={{
+                  background: doc.status === 'REJECTED' ? 'rgba(239, 68, 68, 0.12)' : 'var(--warning-light)',
+                  borderBottom: '1px solid var(--border-color)'
+                }}
+              >
+                <h5 className="mb-0">
+                  {doc.status === 'REJECTED'
+                    ? '❌ Document Rejected — Upload Updated File'
+                    : '⚠️ Correction Requested — Re-upload Required'}
+                </h5>
+              </div>
+              <div style={{ padding: '1.25rem' }}>
+                <p style={{ fontSize: '0.9rem', marginBottom: '0.75rem', color: 'var(--text-secondary)' }}>
+                  {doc.status === 'REJECTED'
+                    ? 'This document was rejected during review. You can upload an updated/corrected file to restart the verification workflow.'
+                    : 'A reviewer has requested corrections. Please re-upload the corrected document below.'}
                 </p>
+
+                {doc.auditTrail && doc.auditTrail.length > 0 && doc.auditTrail[doc.auditTrail.length - 1]?.reason && (
+                  <div
+                    className="alert mb-3 py-2 px-3"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid var(--border-color)',
+                      fontSize: '0.88rem'
+                    }}
+                  >
+                    <strong>Reviewer Feedback:</strong>{' '}
+                    <em>"{doc.auditTrail[doc.auditTrail.length - 1].reason}"</em>
+                  </div>
+                )}
+
                 <div
                   className={`file-upload-area ${resubmitFile ? 'has-file' : ''}`}
                   onClick={() => fileRef.current?.click()}
@@ -135,13 +222,15 @@ export default function DocumentDetailPage() {
                     <div>
                       <div className="upload-icon">📎</div>
                       <div className="upload-text fw-semibold">{resubmitFile.name}</div>
-                      <div className="upload-hint">Click to change</div>
+                      <div className="upload-hint">{formatFileSize(resubmitFile.size)} · Click to change file</div>
                     </div>
                   ) : (
                     <div>
                       <div className="upload-icon">📤</div>
-                      <div className="upload-text">Click to upload corrected document</div>
-                      <div className="upload-hint">PDF, JPG, JPEG, or PNG (max 5MB)</div>
+                      <div className="upload-text">
+                        <strong>Click to select new file</strong> (PDF, PNG, JPG)
+                      </div>
+                      <div className="upload-hint">Max 5MB</div>
                     </div>
                   )}
                 </div>
@@ -150,7 +239,9 @@ export default function DocumentDetailPage() {
                   onClick={handleResubmit}
                   disabled={!resubmitFile || resubmitting}
                 >
-                  {resubmitting ? 'Re-submitting...' : 'Re-submit Document'}
+                  {resubmitting ? (
+                    <span><span className="spinner-border spinner-border-sm me-2"></span>Re-submitting...</span>
+                  ) : 'Re-submit Document for Verification'}
                 </button>
               </div>
             </div>

@@ -26,6 +26,7 @@ public class ReviewService {
     private final ReviewDecisionRepository reviewDecisionRepository;
     private final UserRepository userRepository;
     private final WorkflowService workflowService;
+    private final EmailService emailService;
 
     /**
      * Gets the queue of documents pending review for the given reviewer.
@@ -35,14 +36,16 @@ public class ReviewService {
         User reviewer = userRepository.findByEmail(reviewerEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // First check for specifically assigned documents
-        List<DocumentRequest> assigned = documentRequestRepository.findPendingForAssignedReviewer(reviewer);
-        if (!assigned.isEmpty()) {
-            return assigned;
+        if (reviewer.getRole() == Role.ROLE_ADMIN) {
+            return documentRequestRepository.findByStatus(DocumentStatus.IN_REVIEW);
         }
 
-        // Fall back to role-based queue
-        return documentRequestRepository.findPendingForReviewerRole(reviewer.getRole());
+        List<DocumentRequest> assigned = documentRequestRepository.findPendingForAssignedReviewer(reviewer);
+        List<DocumentRequest> byRole = documentRequestRepository.findPendingForReviewerRole(reviewer.getRole());
+
+        java.util.Set<DocumentRequest> combined = new java.util.LinkedHashSet<>(assigned);
+        combined.addAll(byRole);
+        return new java.util.ArrayList<>(combined);
     }
 
     /**
@@ -119,6 +122,19 @@ public class ReviewService {
         }
 
         documentRequestRepository.save(docRequest);
+
+        // Send email notification to submitter
+        try {
+            emailService.sendStatusUpdateEmail(
+                    docRequest.getSubmitter().getEmail(),
+                    docRequest.getTitle(),
+                    decision.name(),
+                    request.getReason(),
+                    reviewer.getFullName()
+            );
+        } catch (Exception e) {
+            // Log and don't fail transaction
+        }
     }
 
     /**
@@ -146,6 +162,15 @@ public class ReviewService {
         DocumentRequest docRequest = documentRequestRepository.findById(documentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found"));
         return reviewDecisionRepository.findByDocumentRequestOrderByCreatedAtAsc(docRequest);
+    }
+
+    /**
+     * Gets all review decisions made by a specific reviewer (personal history).
+     */
+    public List<ReviewDecision> getReviewerHistory(String reviewerEmail) {
+        User reviewer = userRepository.findByEmail(reviewerEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return reviewDecisionRepository.findByReviewerOrderByCreatedAtDesc(reviewer);
     }
 
     /**

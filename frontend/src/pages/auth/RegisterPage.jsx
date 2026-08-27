@@ -28,8 +28,9 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await API.post('/auth/register', { fullName, email, password });
-      navigate('/verify-otp', { state: { email } });
+      const res = await API.post('/auth/register', { fullName, email, password });
+      const devOtp = res.data?.data?.devOtp;
+      navigate('/verify-otp', { state: { email, devOtp } });
     } catch (err) {
       const msg = err.response?.data?.message || 'Registration failed. Please try again.';
       setError(msg);

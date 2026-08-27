@@ -22,6 +22,7 @@ public interface DocumentRequestRepository extends JpaRepository<DocumentRequest
     @Query("SELECT DISTINCT dr FROM DocumentRequest dr " +
            "JOIN dr.stepInstances si " +
            "WHERE si.stepOrder = dr.currentStepOrder " +
+           "AND si.assignedReviewer IS NULL " +
            "AND si.reviewerRole = :role " +
            "AND si.status IN ('PENDING', 'IN_PROGRESS') " +
            "AND dr.status IN ('SUBMITTED', 'IN_REVIEW') " +

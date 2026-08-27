@@ -48,9 +48,41 @@ public class EmailService {
             log.info("OTP email sent to {}", toEmail);
         } catch (Exception e) {
             log.error("Failed to send OTP email to {}: {}", toEmail, e.getMessage());
-            // In production, you might want to throw an exception here
-            // For now, log it and continue (OTP is still saved in DB)
             log.warn("OTP for {} is: {} (email send failed, logging as fallback)", toEmail, otpCode);
+        }
+    }
+
+    public void sendStatusUpdateEmail(String toEmail, String docTitle, String decision, String reason, String reviewerName) {
+        if (devMode) {
+            log.info("========================================");
+            log.info("DEV MODE - Status update for document '{}': {} by {}", docTitle, decision, reviewerName);
+            if (reason != null && !reason.isBlank()) {
+                log.info("Reason / Notes: {}", reason);
+            }
+            log.info("Notification sent to submitter: {}", toEmail);
+            log.info("========================================");
+            return;
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("Verifyle - Update on your document: " + docTitle);
+            String body = "Hello,\n\n" +
+                    "Your submitted document \"" + docTitle + "\" has received a status update.\n\n" +
+                    "Decision: " + decision + "\n" +
+                    "Reviewed by: " + reviewerName + "\n";
+            if (reason != null && !reason.isBlank()) {
+                body += "Notes/Reason: " + reason + "\n";
+            }
+            body += "\nPlease log in to your Verifyle portal to view the details or track your workflow.\n\n" +
+                    "Regards,\nVerifyle Verification Team";
+            message.setText(body);
+            mailSender.send(message);
+            log.info("Status update email sent to {}", toEmail);
+        } catch (Exception e) {
+            log.error("Failed to send status update email to {}: {}", toEmail, e.getMessage());
         }
     }
 }

@@ -29,15 +29,15 @@ public class DocumentRequest {
     @Column(length = 1000)
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "document_type_id", nullable = false)
     private DocumentType documentType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "submitter_id", nullable = false)
     private User submitter;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "workflow_template_id", nullable = false)
     private WorkflowTemplate workflowTemplate;
 

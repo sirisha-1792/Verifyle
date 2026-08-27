@@ -89,11 +89,8 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center text-muted mb-0" style={{ fontSize: '0.9rem' }}>
-          Don't have an account?{' '}
-          <Link to="/register" className="text-decoration-none" style={{ color: 'var(--primary)', fontWeight: 600 }}>
-            Register here
-          </Link>
+        <p className="text-center text-muted mb-0" style={{ fontSize: '0.82rem' }}>
+          Secure organization login · Powered by Verifyle
         </p>
       </div>
     </div>

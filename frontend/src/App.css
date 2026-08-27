@@ -2,15 +2,13 @@
    Verifyle — Premium Design System
    ============================================ */
 
-/* CSS Custom Properties */
-:root {
-  /* Primary palette */
+/* CSS Custom Properties — Default Light */
+:root, [data-theme="light"] {
   --primary: #4F46E5;
   --primary-dark: #4338CA;
   --primary-light: #818CF8;
   --primary-50: #EEF2FF;
   
-  /* Status colors */
   --success: #10B981;
   --success-light: #D1FAE5;
   --warning: #F59E0B;
@@ -20,7 +18,6 @@
   --info: #3B82F6;
   --info-light: #DBEAFE;
   
-  /* Neutrals */
   --bg-primary: #0F172A;
   --bg-secondary: #1E293B;
   --bg-card: #FFFFFF;
@@ -30,28 +27,113 @@
   --text-muted: #94A3B8;
   --border-color: #E2E8F0;
   
-  /* Sidebar */
   --sidebar-width: 260px;
   --sidebar-bg: #0F172A;
   --sidebar-text: #CBD5E1;
   --sidebar-active: #4F46E5;
   
-  /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   
-  /* Transitions */
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
   --transition-slow: 350ms ease;
   
-  /* Border radius */
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-xl: 24px;
+}
+
+/* Dark Obsidian Theme */
+[data-theme="dark"] {
+  --primary: #6366F1;
+  --primary-dark: #4F46E5;
+  --primary-light: #A5B4FC;
+  --primary-50: rgba(99, 102, 241, 0.15);
+  
+  --bg-primary: #0B0F19;
+  --bg-secondary: #131B2E;
+  --bg-card: #151E32;
+  --bg-page: #0B0F19;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --border-color: #232F48;
+  
+  --sidebar-bg: #0B0F19;
+  --sidebar-text: #CBD5E1;
+  --sidebar-active: #6366F1;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+}
+
+/* Midnight Ocean Blue Theme */
+[data-theme="midnight"] {
+  --primary: #0EA5E9;
+  --primary-dark: #0284C7;
+  --primary-light: #7DD3FC;
+  --primary-50: rgba(14, 165, 233, 0.15);
+  
+  --bg-primary: #050B17;
+  --bg-secondary: #0B172F;
+  --bg-card: #0F203F;
+  --bg-page: #050B17;
+  --text-primary: #F0F9FF;
+  --text-secondary: #93C5FD;
+  --text-muted: #60A5FA;
+  --border-color: #1E3A68;
+  
+  --sidebar-bg: #040812;
+  --sidebar-text: #BAE6FD;
+  --sidebar-active: #0EA5E9;
+}
+
+/* Emerald Forest Theme */
+[data-theme="emerald"] {
+  --primary: #10B981;
+  --primary-dark: #059669;
+  --primary-light: #6EE7B7;
+  --primary-50: rgba(16, 185, 129, 0.15);
+  
+  --bg-primary: #04140F;
+  --bg-secondary: #0A251D;
+  --bg-card: #0E3529;
+  --bg-page: #04140F;
+  --text-primary: #ECFDF5;
+  --text-secondary: #A7F3D0;
+  --text-muted: #6EE7B7;
+  --border-color: #165340;
+  
+  --sidebar-bg: #030F0B;
+  --sidebar-text: #D1FAE5;
+  --sidebar-active: #10B981;
+}
+
+/* Royal Amethyst Theme */
+[data-theme="purple"] {
+  --primary: #8B5CF6;
+  --primary-dark: #7C3AED;
+  --primary-light: #C4B5FD;
+  --primary-50: rgba(139, 92, 246, 0.15);
+  
+  --bg-primary: #0F081D;
+  --bg-secondary: #1A1032;
+  --bg-card: #231644;
+  --bg-page: #0F081D;
+  --text-primary: #FAF5FF;
+  --text-secondary: #E9D5FF;
+  --text-muted: #C084FC;
+  --border-color: #3C2268;
+  
+  --sidebar-bg: #0B0616;
+  --sidebar-text: #EDE9FE;
+  --sidebar-active: #8B5CF6;
 }
 
 /* ===== Global Styles ===== */

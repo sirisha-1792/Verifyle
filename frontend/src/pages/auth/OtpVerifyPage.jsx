@@ -8,6 +8,7 @@ export default function OtpVerifyPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [activeDevOtp, setActiveDevOtp] = useState('');
   const inputRefs = useRef([]);
   const navigate = useNavigate();
   const location = useLocation();
@@ -17,7 +18,10 @@ export default function OtpVerifyPage() {
     if (!email) {
       navigate('/register');
     }
-  }, [email, navigate]);
+    if (location.state?.devOtp) {
+      setActiveDevOtp(location.state.devOtp);
+    }
+  }, [email, navigate, location.state]);
 
   useEffect(() => {
     if (cooldown > 0) {
@@ -55,6 +59,13 @@ export default function OtpVerifyPage() {
     }
   };
 
+  const fillDevOtp = () => {
+    if (activeDevOtp && activeDevOtp.length === 6) {
+      setOtp(activeDevOtp.split(''));
+      inputRefs.current[5]?.focus();
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -70,7 +81,7 @@ export default function OtpVerifyPage() {
     try {
       await API.post('/auth/verify-otp', { email, otpCode });
       setSuccess('Email verified successfully! Redirecting to login...');
-      setTimeout(() => navigate('/login'), 2000);
+      setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
       setError(err.response?.data?.message || 'OTP verification failed');
     } finally {
@@ -83,8 +94,11 @@ export default function OtpVerifyPage() {
     setError('');
 
     try {
-      await API.post('/auth/resend-otp', { email });
-      setSuccess('New OTP sent! Check your email (or console in dev mode).');
+      const res = await API.post('/auth/resend-otp', { email });
+      if (res.data?.data?.devOtp) {
+        setActiveDevOtp(res.data.data.devOtp);
+      }
+      setSuccess('New OTP sent! Check your email.');
       setCooldown(60);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to resend OTP');
@@ -105,6 +119,17 @@ export default function OtpVerifyPage() {
         <p className="text-center mb-3" style={{ fontWeight: 600, fontSize: '0.95rem' }}>
           {email}
         </p>
+
+        {activeDevOtp && (
+          <div className="alert alert-info py-2 px-3 mb-3 d-flex justify-content-between align-items-center" style={{ fontSize: '0.88rem' }}>
+            <div>
+              <span>🔑 <strong>Dev OTP:</strong> <code style={{ fontSize: '1rem', fontWeight: 700 }}>{activeDevOtp}</code></span>
+            </div>
+            <button type="button" className="btn btn-sm btn-info text-white" onClick={fillDevOtp} style={{ fontSize: '0.75rem', padding: '0.15rem 0.5rem' }}>
+              Auto-fill
+            </button>
+          </div>
+        )}
 
         {error && <div className="alert alert-danger alert-custom">{error}</div>}
         {success && <div className="alert alert-success alert-custom">{success}</div>}
