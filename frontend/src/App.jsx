@@ -44,8 +44,8 @@ export default function App() {
   const { user, loading, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('verifyle_theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
+    localStorage.removeItem('verifyle_theme');
+    document.documentElement.removeAttribute('data-theme');
   }, []);
 
   if (loading) {

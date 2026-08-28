@@ -60,4 +60,23 @@ public class AuthController {
         AuthResponse authResponse = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success("Login successful", authResponse));
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<java.util.Map<String, Object>>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        String otp = authService.forgotPassword(request);
+        java.util.Map<String, Object> data = new java.util.HashMap<>();
+        data.put("email", request.getEmail());
+        if (otpService.isDevMode()) {
+            data.put("devOtp", otp);
+            data.put("devMode", true);
+        }
+        return ResponseEntity.ok(ApiResponse.success(
+                "Password reset verification OTP has been sent to your email.", data));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.success("Your password has been changed successfully. You can now sign in."));
+    }
 }

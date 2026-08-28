@@ -66,14 +66,14 @@ export default function Sidebar() {
           </div>
         ))}
         
-        {/* Settings & Theme link for everyone */}
+        {/* Settings link for everyone */}
         <div className="nav-item" style={{ marginTop: '0.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '0.5rem' }}>
           <NavLink
             to="/profile"
             className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
           >
             <span className="nav-icon">⚙️</span>
-            Settings & Theme
+            Settings
           </NavLink>
         </div>
       </nav>

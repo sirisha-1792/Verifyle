@@ -27,9 +27,8 @@ public class EmailService {
     public void sendOtpEmail(String toEmail, String otpCode) {
         if (devMode) {
             log.info("========================================");
-            log.info("DEV MODE - OTP for {}: {}", toEmail, otpCode);
+            log.info("DEV MODE - Registration OTP for {}: {}", toEmail, otpCode);
             log.info("========================================");
-            return;
         }
 
         try {
@@ -45,10 +44,39 @@ public class EmailService {
                     "Regards,\nVerifyle Team"
             );
             mailSender.send(message);
-            log.info("OTP email sent to {}", toEmail);
+            log.info("OTP verification email sent successfully to {}", toEmail);
         } catch (Exception e) {
-            log.error("Failed to send OTP email to {}: {}", toEmail, e.getMessage());
-            log.warn("OTP for {} is: {} (email send failed, logging as fallback)", toEmail, otpCode);
+            log.warn("Could not deliver OTP email directly via SMTP to {}: {}", toEmail, e.getMessage());
+            log.info("OTP code for {}: {}", toEmail, otpCode);
+        }
+    }
+
+    public void sendPasswordResetOtp(String toEmail, String otpCode) {
+        if (devMode) {
+            log.info("========================================");
+            log.info("DEV MODE - Password Reset OTP for {}: {}", toEmail, otpCode);
+            log.info("========================================");
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("Verifyle - Password Reset Verification Code");
+            message.setText(
+                    "Hello,\n\n" +
+                    "A password reset request was received for your Verifyle account.\n\n" +
+                    "Your 6-digit Password Reset OTP is: " + otpCode + "\n\n" +
+                    "This code expires in 5 minutes. Do not share this code with anyone.\n\n" +
+                    "If you did not request a password reset, please ignore this email or check your account security.\n\n" +
+                    "Regards,\n" +
+                    "Verifyle Security Team"
+            );
+            mailSender.send(message);
+            log.info("Password reset OTP email sent successfully to {}", toEmail);
+        } catch (Exception e) {
+            log.warn("Could not deliver Password Reset email directly via SMTP to {}: {}", toEmail, e.getMessage());
+            log.info("Password Reset OTP for {}: {}", toEmail, otpCode);
         }
     }
 

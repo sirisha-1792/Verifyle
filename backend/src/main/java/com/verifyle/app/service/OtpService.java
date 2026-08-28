@@ -60,6 +60,25 @@ public class OtpService {
     }
 
     /**
+     * Generates a new 6-digit OTP for password reset, saves it, and sends it via email.
+     */
+    public String generateAndSendPasswordResetOtp(User user) {
+        String otpCode = String.format("%06d", secureRandom.nextInt(1000000));
+
+        OtpToken otpToken = OtpToken.builder()
+                .user(user)
+                .otpCode(otpCode)
+                .expiresAt(LocalDateTime.now().plusMinutes(otpExpiryMinutes))
+                .verified(false)
+                .attempts(0)
+                .build();
+
+        otpTokenRepository.save(otpToken);
+        emailService.sendPasswordResetOtp(user.getEmail(), otpCode);
+        return otpCode;
+    }
+
+    /**
      * Validates the provided OTP code against the latest OTP for the user.
      * @return true if OTP is valid, false otherwise
      */

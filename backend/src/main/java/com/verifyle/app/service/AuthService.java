@@ -120,4 +120,43 @@ public class AuthService {
                 .userId(user.getId())
                 .build();
     }
+
+    /**
+     * Initiates forgot password request: generates and sends OTP to user email.
+     */
+    @Transactional
+    public String forgotPassword(ForgotPasswordRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("No registered account found with email: " + request.getEmail()));
+
+        if (!user.getEnabled()) {
+            throw new BadRequestException("This account is currently disabled. Please contact your system administrator.");
+        }
+
+        if (!otpService.canResendOtp(email)) {
+            long remaining = otpService.getRemainingCooldown(email);
+            throw new BadRequestException("Please wait " + remaining + " seconds before requesting a new OTP.");
+        }
+
+        return otpService.generateAndSendPasswordResetOtp(user);
+    }
+
+    /**
+     * Resets user password after verifying the 6-digit OTP code.
+     */
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("No registered account found with email: " + request.getEmail()));
+
+        boolean valid = otpService.verifyOtp(email, request.getOtpCode().trim());
+        if (!valid) {
+            throw new BadRequestException("Invalid or expired OTP code. Please verify the code or request a new one.");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
 }

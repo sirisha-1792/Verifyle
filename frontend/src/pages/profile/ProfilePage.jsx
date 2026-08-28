@@ -10,7 +10,7 @@ export default function ProfilePage() {
   // State
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('theme');
+  const [activeTab, setActiveTab] = useState('personal');
 
   // Edit Name State
   const [fullName, setFullName] = useState('');
@@ -26,21 +26,11 @@ export default function ProfilePage() {
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  // Theme State
-  const [currentTheme, setCurrentTheme] = useState(() => {
-    return localStorage.getItem('verifyle_theme') || 'light';
-  });
-  const [compactTable, setCompactTable] = useState(() => {
-    return localStorage.getItem('verifyle_compact') === 'true';
-  });
-
   // Logout Modal State
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     fetchProfile();
-    // Apply current theme
-    applyTheme(currentTheme);
   }, []);
 
   const fetchProfile = async () => {
@@ -53,12 +43,6 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const applyTheme = (themeName) => {
-    setCurrentTheme(themeName);
-    localStorage.setItem('verifyle_theme', themeName);
-    document.documentElement.setAttribute('data-theme', themeName);
   };
 
   const handleUpdateName = async (e) => {
@@ -125,59 +109,6 @@ export default function ProfilePage() {
     navigate('/login');
   };
 
-  const themes = [
-    {
-      id: 'light',
-      name: 'Clean Executive',
-      icon: '☀️',
-      desc: 'Crisp, high-contrast white & slate light theme',
-      previewBg: '#F8FAFC',
-      previewCard: '#FFFFFF',
-      previewAccent: '#4F46E5',
-      textColor: '#0F172A',
-    },
-    {
-      id: 'dark',
-      name: 'Dark Obsidian',
-      icon: '🌙',
-      desc: 'Sleek dark mode with indigo highlights',
-      previewBg: '#0B0F19',
-      previewCard: '#151E32',
-      previewAccent: '#6366F1',
-      textColor: '#F8FAFC',
-    },
-    {
-      id: 'midnight',
-      name: 'Midnight Ocean',
-      icon: '🌌',
-      desc: 'Deep navy blue with electric cyan accents',
-      previewBg: '#050B17',
-      previewCard: '#0F203F',
-      previewAccent: '#0EA5E9',
-      textColor: '#F0F9FF',
-    },
-    {
-      id: 'emerald',
-      name: 'Emerald Forest',
-      icon: '🌲',
-      desc: 'Deep rich dark green with mint highlights',
-      previewBg: '#04140F',
-      previewCard: '#0E3529',
-      previewAccent: '#10B981',
-      textColor: '#ECFDF5',
-    },
-    {
-      id: 'purple',
-      name: 'Royal Amethyst',
-      icon: '💜',
-      desc: 'Luxurious violet & velvet dark theme',
-      previewBg: '#0F081D',
-      previewCard: '#231644',
-      previewAccent: '#8B5CF6',
-      textColor: '#FAF5FF',
-    },
-  ];
-
   const getRoleBadge = (role) => {
     switch (role) {
       case 'ROLE_ADMIN':
@@ -207,7 +138,7 @@ export default function ProfilePage() {
         <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
           <div>
             <h1>Profile & Account Settings</h1>
-            <p>Customize your dashboard appearance, edit personal information, and manage security</p>
+            <p>Manage personal information and account security</p>
           </div>
           <button
             className="btn btn-outline-danger"
@@ -272,15 +203,6 @@ export default function ProfilePage() {
       <ul className="nav nav-pills mb-4" style={{ gap: '0.5rem' }}>
         <li className="nav-item">
           <button
-            className={`btn ${activeTab === 'theme' ? 'btn-primary' : 'btn-outline-custom'}`}
-            onClick={() => setActiveTab('theme')}
-            id="tab-theme"
-          >
-            🎨 Theme & Appearance
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
             className={`btn ${activeTab === 'personal' ? 'btn-primary' : 'btn-outline-custom'}`}
             onClick={() => setActiveTab('personal')}
             id="tab-personal"
@@ -298,99 +220,6 @@ export default function ProfilePage() {
           </button>
         </li>
       </ul>
-
-      {/* TAB 1: THEME & APPEARANCE */}
-      {activeTab === 'theme' && (
-        <div className="row">
-          <div className="col-12 mb-4">
-            <div className="data-card">
-              <div className="data-card-header">
-                <h5>Choose Dashboard Theme</h5>
-              </div>
-              <div style={{ padding: '1.5rem' }}>
-                <p className="text-secondary mb-4" style={{ fontSize: '0.9rem' }}>
-                  Pick your favorite color palette. Your theme preference applies instantly to the entire dashboard and is saved automatically.
-                </p>
-
-                <div className="row g-3">
-                  {themes.map((t) => {
-                    const isSelected = currentTheme === t.id;
-                    return (
-                      <div className="col-md-6 col-lg-4" key={t.id}>
-                        <div
-                          onClick={() => applyTheme(t.id)}
-                          style={{
-                            cursor: 'pointer',
-                            borderRadius: 'var(--radius-lg)',
-                            border: isSelected ? `2px solid ${t.previewAccent}` : '1px solid var(--border-color)',
-                            background: t.previewBg,
-                            padding: '1.25rem',
-                            position: 'relative',
-                            transition: 'all 0.2s ease',
-                            boxShadow: isSelected ? `0 0 0 4px ${t.previewAccent}25, 0 4px 12px rgba(0,0,0,0.15)` : 'none',
-                          }}
-                          className="theme-card"
-                          id={`theme-select-${t.id}`}
-                        >
-                          {isSelected && (
-                            <span
-                              style={{
-                                position: 'absolute',
-                                top: '12px',
-                                right: '12px',
-                                background: t.previewAccent,
-                                color: '#FFF',
-                                borderRadius: '50%',
-                                width: 22,
-                                height: 22,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '0.75rem',
-                                fontWeight: 700,
-                              }}
-                            >
-                              ✓
-                            </span>
-                          )}
-
-                          <div className="d-flex align-items-center gap-2 mb-2">
-                            <span style={{ fontSize: '1.4rem' }}>{t.icon}</span>
-                            <h6 className="mb-0" style={{ color: t.textColor, fontWeight: 700 }}>
-                              {t.name}
-                            </h6>
-                          </div>
-
-                          <p style={{ color: t.textColor, opacity: 0.75, fontSize: '0.8rem', minHeight: '36px' }}>
-                            {t.desc}
-                          </p>
-
-                          {/* Mini Interface Mockup */}
-                          <div
-                            style={{
-                              background: t.previewCard,
-                              borderRadius: 'var(--radius-md)',
-                              padding: '0.75rem',
-                              border: `1px solid ${t.previewAccent}30`,
-                            }}
-                          >
-                            <div className="d-flex align-items-center justify-content-between mb-2">
-                              <div style={{ width: '40%', height: 6, background: t.previewAccent, borderRadius: 3 }}></div>
-                              <div style={{ width: '20%', height: 6, background: `${t.textColor}30`, borderRadius: 3 }}></div>
-                            </div>
-                            <div style={{ width: '100%', height: 4, background: `${t.textColor}15`, borderRadius: 2, marginBottom: 4 }}></div>
-                            <div style={{ width: '70%', height: 4, background: `${t.textColor}15`, borderRadius: 2 }}></div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* TAB 2: PERSONAL DETAILS */}
       {activeTab === 'personal' && (
